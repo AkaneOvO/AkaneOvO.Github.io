@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>Hexo安装+butterfly主题配置</title>
+      <link href="2021/02/22/HexoConfig/"/>
+      <url>2021/02/22/HexoConfig/</url>
+      
+        <content type="html"><![CDATA[<p>参考：</p><ul><li><a href="https://blog.csdn.net/sinat_37781304/article/details/82729029?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.control&dist_request_id=2d5c8b14-1a70-4516-a004-1962b3a68783&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.control">hexo史上最全搭建教程</a></li><li><a href="https://blog.csdn.net/qq_31880107/article/details/86688467">windows下Hexo博客搭建过程</a></li><li><a href="https://hexo.io/docs/">hexo官方文档</a></li><li><a href="https://valine.js.org/">Valine官方文档</a></li><li><a href="https://yanyinhong.github.io/2017/05/02/How-to-insert-image-in-hexo-post/">Hexo博客搭建之在文章中插入图片</a></li></ul><h2 id="1-Hexo安装"><a href="#1-Hexo安装" class="headerlink" title="1.Hexo安装"></a>1.Hexo安装</h2><p>需要事先安装好：</p><ul><li><p>nodejs，可以使用<code>node -v</code>查看是否已经安装</p></li><li><p>git，可以使用<code>git --version</code>查看是否已经安装</p><p>一般下载完之后还需要将其配置到系统路径中，参考<a href="https://blog.csdn.net/weixin_43803924/article/details/104606989">这一篇</a></p></li></ul><p>确保都安装好后：</p><ul><li><p>新建一个空文件夹，<code>cd</code>进去</p></li><li><p>可以右键打开<code>powershell</code>，也可以使用<code>Git Bash</code>，按顺序执行以下命令</p><ul><li><p><code>npm install -g hexo</code></p></li><li><p><code>hexo init 你的文件夹名</code></p><p>初始化成功后会显示<code>Start blogging with Hexo!</code>，同时空文件夹下会多出一个你刚刚命名的文件夹</p><p><img src="/img/image-20210222173111226.png" alt="image-20210222173111226"></p></li></ul><center>输入的是hexo init akaneovoBlog</center></li><li><p><code>cd</code>进入到新创建的文件夹中，按顺序执行以下命令</p><ul><li><code>npm install</code></li><li><code>hexo g</code>或<code>hexo generate</code></li><li><code>hexo server</code></li></ul></li><li><p>此时会显示<code>Hexo is running at http://localhost:4000/</code>，可以打开浏览器查看，若展示出默认的博客，则安装成功</p></li></ul><h2 id="2-将本地博客托管到Github上"><a href="#2-将本地博客托管到Github上" class="headerlink" title="2.将本地博客托管到Github上"></a>2.将本地博客托管到Github上</h2><p>需要更改配置文件<code>_config.yml</code>，以上面的文件夹为例，其地址为：</p><p><img src="/img/image-20210222173540149.png" alt="image-20210222173540149"></p><p>其中的<code>myBlog</code>即一开始创建的空文件夹，<code>akaneovoBlog</code>为<code>hexo init</code>时创建的文件夹，</p><p><strong>不要用txt直接打开它，最好用vscode之类的文本编辑器</strong></p><p>修改<code>_config.yml</code>文件中的<code>deploy</code>，改成图示形式：</p><p><img src="/img/image-20210222173755509.png" alt="image-20210222173755509"></p><p><strong>冒号后面记得带一个空格</strong></p><p>其中<code>repository</code>为自己的github仓库地址，也可以写成http的，但是不知道为啥我用了半天之后突然间<code>hexo d</code>就报错了，改成上面这个格式的就好了</p><p>保存之后安装<code>hexo-deployer-git</code>插件：<code>npm install hexo-deployer-git --save</code></p><p>之后每次修改本地博客并上传到github，都要执行如下代码：</p><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo generator # 或简写为hexo g</span><br><span class="line">hexo deploy # 或简写为hexo d</span><br></pre></td></tr></table></figure><p>如果只是在本地更改了文件在本地进行测试：</p><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo clean</span><br><span class="line">hexo g</span><br><span class="line">hexo server</span><br></pre></td></tr></table></figure><p>托管到github上面之后，可以通过<code>xxx.github.io</code>查看自己的个人博客，或者通过自己和Github Pages绑定的域名进行查看</p><h2 id="3-配置butterfly主题"><a href="#3-配置butterfly主题" class="headerlink" title="3.配置butterfly主题"></a>3.配置butterfly主题</h2><p>u1s1，butterfly比之前看到的anatole功能真的多了好多，文档也多了超级多</p><p>看<a href="https://butterfly.js.org/">官方文档</a>来配置就够啦</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 个人博客 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Hexo </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Github Pages与个人域名绑定</title>
+      <link href="2021/02/22/BlogConfig/"/>
+      <url>2021/02/22/BlogConfig/</url>
+      
+        <content type="html"><![CDATA[<p>参考：</p><p><a href="https://cyclechen.me/2019/03/13/2019-03-13-setup-github-page-personal-with-godaddy/">github page 绑定 GoDaddy 的个人域名</a></p><h2 id="1-GoDaddy买一个域名"><a href="#1-GoDaddy买一个域名" class="headerlink" title="1.GoDaddy买一个域名"></a>1.GoDaddy买一个域名</h2><p>有手就行</p><h2 id="2-github-repository配置"><a href="#2-github-repository配置" class="headerlink" title="2.github repository配置"></a>2.github repository配置</h2><h3 id="新建一个github仓库"><a href="#新建一个github仓库" class="headerlink" title="新建一个github仓库"></a>新建一个github仓库</h3><ul><li><p>命名格式为<code>[随便一个名字].github.io</code>，例如<code>akaneovo.github.io</code>（之后都是拿这个作为例子）</p></li><li><p>设置为public，不然后面的github pages没有办法选择theme</p></li><li><p>选择<code>add a README file</code></p><p><img src="/img/image-20210221222049663.png" alt="image-20210221222049663.png"></p></li></ul><h3 id="Settings"><a href="#Settings" class="headerlink" title="Settings"></a>Settings</h3><ul><li><p>点击<code>Settings</code>，下拉到<code>GitHub Pages</code></p></li><li><p>点击<code>Change theme</code>选择一个Jekyll theme</p><p>如果之前自己写了<code>html</code>文件之类的还是要选，不然好像会404</p></li><li><p><code>Custom domain</code>里面填自己购买的域名</p><p><img src="/img/image-20210221223140725.png" alt="image-20210221223140725.png"></p></li></ul><h2 id="3-GoDaddy配置"><a href="#3-GoDaddy配置" class="headerlink" title="3.GoDaddy配置"></a>3.GoDaddy配置</h2><ul><li><p>选择<code>DNS</code></p><p><img src="/img/image-20210221223838993.png" alt="image-20210221223838993.png"></p></li></ul><ul><li><p>在<code>记录</code>部分添加两种记录</p><p><img src="/img/image-20210221223953867.png" alt="image-20210221223953867"></p><p>其中github IP可以在<a href="https://docs.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site#configuring-an-apex-domain">这里</a>获取</p><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">185.199.108.153</span><br><span class="line">185.199.109.153</span><br><span class="line">185.199.110.153</span><br><span class="line">185.199.111.153</span><br></pre></td></tr></table></figure><p>这四个随便哪一个都行</p></li></ul><h2 id="4-DNS设置"><a href="#4-DNS设置" class="headerlink" title="4.DNS设置"></a>4.DNS设置</h2><ul><li><p>打开<a href="https://www.dnspod.cn注册一个账号/">https://www.dnspod.cn注册一个账号</a></p></li><li><p>选择DNS解析，把自己买的域名添加进去</p></li><li><p>会提示GoDaddy的域名服务器和腾讯云的域名服务器不一样，打开GoDaddy域名配置的地方，使用自定义域名服务器</p><p><img src="/img/image-20210221224432853.png" alt="image-20210221224432853"></p></li><li><p>两个域名都复制腾讯云提示的域名服务器的地址，然后保存</p></li><li><p>点击添加的域名，类似于GoDaddy的配置，添加两条记录</p><p><img src="/images/image-20210221224612240.png" alt="image-20210221224612240"></p></li><li><p>保存之后点击域名设置-&gt;域名信息-&gt;健康诊断，看一下域名解析通不通过（我这边还是301，但是不知道为啥就是可以正常访问注册的域名了）</p><p><img src="/img/image-20210221224752104.png" alt="image-20210221224752104"></p></li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> 个人博客 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> GithubPages </tag>
+            
+            <tag> Godaddy </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
