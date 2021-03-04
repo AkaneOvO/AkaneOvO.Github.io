@@ -1,0 +1,255 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Git内部原理-笔记 | AkaneOvO's Blog</title><meta name="keywords" content="Git"><meta name="author" content="AkaneOvO"><meta name="copyright" content="AkaneOvO"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="看了之后总觉得之前操作系统实验不是白写的╰(￣ω￣ｏ) 参考： 阮一峰:Git原理入门 Git数据存储的原理浅析 Git内部原理－Git对象 .git目录是维护git信息的目录 git文件结构.git文件中的内容   HEAD 当前提交的指针的位置   refs&#x2F;head 保存了本地全部分支最后一次提交的id 由于每一次commit的实际上是commit一个文件，而这个id就是commit文件的h">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git内部原理-笔记">
+<meta property="og:url" content="http://example.com/2021/03/04/gitInternalPrinciple/index.html">
+<meta property="og:site_name" content="AkaneOvO&#39;s Blog">
+<meta property="og:description" content="看了之后总觉得之前操作系统实验不是白写的╰(￣ω￣ｏ) 参考： 阮一峰:Git原理入门 Git数据存储的原理浅析 Git内部原理－Git对象 .git目录是维护git信息的目录 git文件结构.git文件中的内容   HEAD 当前提交的指针的位置   refs&#x2F;head 保存了本地全部分支最后一次提交的id 由于每一次commit的实际上是commit一个文件，而这个id就是commit文件的h">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/img/nichijou.jpg">
+<meta property="article:published_time" content="2021-03-04T15:05:29.997Z">
+<meta property="article:modified_time" content="2021-03-04T15:22:04.210Z">
+<meta property="article:author" content="AkaneOvO">
+<meta property="article:tag" content="Git">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/nichijou.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2021/03/04/gitInternalPrinciple/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-03-04 23:22:04 23:22:04'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><link rel="stylesheet" href="/css/bilibili.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/favicon.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">6</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">10</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/nichijou.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">AkaneOvO's Blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Git内部原理-笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2021-03-04T15:05:29.997Z" title="Created 2021-03-04 23:05:29 23:05:29">2021-03-04 23:05:29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-03-04T15:22:04.210Z" title="Updated 2021-03-04 23:22:04 23:22:04">2021-03-04 23:22:04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Git/">Git</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">1.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>3min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>看了之后总觉得之前操作系统实验不是白写的╰(￣ω￣ｏ)</p>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2018/10/git-internals.html">阮一峰:Git原理入门</a></p>
+<p><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000016320008">Git数据存储的原理浅析</a></p>
+<p><a target="_blank" rel="noopener" href="https://git-scm.com/book/zh/v2/Git-%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86-Git-%E5%AF%B9%E8%B1%A1">Git内部原理－Git对象</a></p>
+<p><code>.git</code>目录是维护git信息的目录</p>
+<h2 id="git文件结构"><a href="#git文件结构" class="headerlink" title="git文件结构"></a>git文件结构</h2><p><code>.git</code>文件中的内容</p>
+<p><img src="/img/clip_image002.png" alt="img"></p>
+<ul>
+<li><p>HEAD</p>
+<p>当前提交的指针的位置</p>
+<p><img src="/img/clip_image004.png" alt="img"></p>
+</li>
+<li><p>refs/head</p>
+<p>保存了本地全部分支最后一次提交的id</p>
+<p>由于每一次commit的实际上是commit一个文件，而这个id就是commit文件的hash值，这种方式贯穿了git的全部文件的命名</p>
+<p><img src="/img/clip_image005.png" alt="img"></p>
+</li>
+<li><p>log</p>
+<p>每一次提交的记录</p>
+<p><img src="/img/clip_image007.png" alt="img"></p>
+</li>
+<li><p>objects</p>
+<p>存放git本地仓库对象</p>
+</li>
+</ul>
+<h2 id="Git底层数据对象"><a href="#Git底层数据对象" class="headerlink" title="Git底层数据对象"></a>Git底层数据对象</h2><p><img src="/img/clip_image009.png" alt="img"></p>
+<ul>
+<li><p>tag对象</p>
+</li>
+<li><p>blob对象</p>
+<p>用于存储文件内容（不会保存文件名）</p>
+<p>因为<code>git add .</code>命令实际上执行的是</p>
+<ul>
+<li>保存对象（<code>git hash-object</code>）</li>
+<li>更新暂存区（<code>git update-index</code>，在暂存区记录一个发生变动的文件）</li>
+</ul>
+<p>其中<code>git hash-object</code>做的就是就是把文件的内容压缩为二进制文件，称为一个git对象（文件的话就是blob对象），保存在<code>.git/objects</code>目录中</p>
+<p>使用<code>git hash-obejct</code>命令还会计算当前内容的<code>SHA1</code>哈希值（长度为40的字符串），作为该对象的文件名，其中前两个字母为object文件夹中的文件夹名，后面的字母为该文件夹下的文件名，如果用<code>cat</code>查看的话会发现里面是一些压缩后的二进制内容</p>
+<p><img src="/img/clip_image011.png" alt="img"></p>
+</li>
+<li><p>tree对象</p>
+<p>用于存储当前目录结构，能够保存文件名，将多个文件组织到一起</p>
+<p><code>git write-tree</code>命令能够将当前的目录结构生成一个git对象（tree对象），也保存在<code>.git/object</code>目录中</p>
+</li>
+<li><p>commit对象</p>
+<p><code>commit</code>的时候有提交说明，包括所在的tree，parent（父提交）是谁，作者等信息</p>
+<p><code>git commit-tree</code>命令将元数据（blob）和目录树（tree）一起生成一个git对象（commit对象），也保存在<code>git/object</code>目录中</p>
+<p>这样通过上面那张图，就可以大致看出git本地存储的文件结构了</p>
+</li>
+</ul>
+<p>在每一次提交的时候，objects、logs以及refs文件夹都会发生变化：</p>
+<ul>
+<li>objects文件夹中新增对应的tree、blob以及commit对象（通过SHA-1对内容和头信息生成Hash值）</li>
+<li>logs文件夹中对应分支的文件新增一次提交记录</li>
+<li>更改refs文件夹中对应分支最新一次提交的id（commit对象的值）</li>
+</ul>
+<h2 id="剖析Git对象"><a href="#剖析Git对象" class="headerlink" title="剖析Git对象"></a>剖析Git对象</h2><p>由于<code>.git/objects</code>目录中的文件都是压缩过的，可以使用<code>cat-file</code>命令从git中取回数据（剖析git对象），<code>-p</code>选项可以使该命令自动判断内容的类型，并展示大致内容</p>
+<p>如果删掉了本地的副本，而<code>.git/objects</code>中还保存着压缩后的内容，在知道对应的SHA-1的情况下，可以取回对应的内容</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git cat-file -p 83baae61804e65cc73a7201a7252750c76066a30 &gt; test.txt</span><br></pre></td></tr></table></figure>
+
+<h2 id="包文件"><a href="#包文件" class="headerlink" title="包文件"></a>包文件</h2><p>由于Git最初向磁盘中存储对象所使用的格式为loose格式，它会时不时将多个这些对象打包成一个packfile的二进制文件，用来节省空间和提升效率（垃圾回收，手动方式：<code>git gc --auto</code>，可以通过<code>gc.auto</code>和<code>gc.autopacklimit</code>来设置超过多少个松散对象和包文件才让git启动一次gc命令）</p>
+<p>可以使用<code>git gc</code>命令对Git对象进行打包；向远程服务器进行推送时，git也会打包</p>
+<p>打包之后，你的<code>objects</code>目录可能变成这个样子：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ find .git/objects -type f</span><br><span class="line">.git/objects/bd/9dbf5aae1a3862dd1526723246b20206e5fc37</span><br><span class="line">.git/objects/d6/70460b4b4aece5915caf5c68d12f560a9fe3e4</span><br><span class="line">.git/objects/info/packs</span><br><span class="line">.git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.idx</span><br><span class="line">.git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.pack</span><br></pre></td></tr></table></figure>
+
+<p><code>pack</code>是一个包文件，而<code>idx</code>是对应的索引文件</p>
+<p>索引文件中包含了包文件的偏移信息，可以通过索引文件快速定位任意一个指定对象</p>
+<p>git打包对象时，会查找命名及大小相近的文件，且保存不同文件版本之间的差异</p>
+<p>如果执行了<code>git gc</code>命令，该命令还会将<code>refs</code>文件夹中的文件进行打包，将其移动到名为<code>.git/packed-refs</code>的文件中，因此，如果你在<code>refs</code>目录中找不到一个引用，那么它可能在<code>packed-refs</code>文件中 </p>
+<p>那么那么那么，学习了上面的知识，如果不采用传送整个<code>.git</code>文件夹的方式，每次要把本地<code>commit</code>的文件传送到远端，我们需要发送哪些文件嘞(σ｀д′)σ</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">AkaneOvO</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="http://example.com/2021/03/04/gitInternalPrinciple/">http://example.com/2021/03/04/gitInternalPrinciple/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Git/">Git</a></div><div class="post_share"><div class="social-share" data-image="/img/nichijou.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/03/02/aknights_1/"><img class="next-cover" src="/img/aknights_1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">明日方舟 鸡翅小羊双人CE-5</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> Comment</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/favicon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">AkaneOvO</div><div class="author-info__description">借我温软的鲁莽和玩笑的庄严</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">6</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">10</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/AkaneOvO" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:akaneovo0517@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#git%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84"><span class="toc-number">1.</span> <span class="toc-text">git文件结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Git%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E5%AF%B9%E8%B1%A1"><span class="toc-number">2.</span> <span class="toc-text">Git底层数据对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%96%E6%9E%90Git%E5%AF%B9%E8%B1%A1"><span class="toc-number">3.</span> <span class="toc-text">剖析Git对象</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8C%85%E6%96%87%E4%BB%B6"><span class="toc-number">4.</span> <span class="toc-text">包文件</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/03/04/gitInternalPrinciple/" title="Git内部原理-笔记"><img src="/img/nichijou.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Git内部原理-笔记"/></a><div class="content"><a class="title" href="/2021/03/04/gitInternalPrinciple/" title="Git内部原理-笔记">Git内部原理-笔记</a><time datetime="2021-03-04T15:05:29.997Z" title="Created 2021-03-04 23:05:29 23:05:29">2021-03-04 23:05:29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/02/aknights_1/" title="明日方舟 鸡翅小羊双人CE-5"><img src="/img/aknights_1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="明日方舟 鸡翅小羊双人CE-5"/></a><div class="content"><a class="title" href="/2021/03/02/aknights_1/" title="明日方舟 鸡翅小羊双人CE-5">明日方舟 鸡翅小羊双人CE-5</a><time datetime="2021-03-02T13:42:54.486Z" title="Created 2021-03-02 21:42:54 21:42:54">2021-03-02 21:42:54</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/28/LinuxFilePermission/" title="Linux文件权限"><img src="/img/android_girl.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux文件权限"/></a><div class="content"><a class="title" href="/2021/02/28/LinuxFilePermission/" title="Linux文件权限">Linux文件权限</a><time datetime="2021-02-28T13:36:09.845Z" title="Created 2021-02-28 21:36:09 21:36:09">2021-02-28 21:36:09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/26/jupyterhub_1/" title="浅析Jupyterhub架构"><img src="/img/nanaqi.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅析Jupyterhub架构"/></a><div class="content"><a class="title" href="/2021/02/26/jupyterhub_1/" title="浅析Jupyterhub架构">浅析Jupyterhub架构</a><time datetime="2021-02-26T02:03:31.067Z" title="Created 2021-02-26 10:03:31 10:03:31">2021-02-26 10:03:31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/02/22/HexoConfig/" title="Hexo安装+butterfly主题配置"><img src="/img/linglan.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo安装+butterfly主题配置"/></a><div class="content"><a class="title" href="/2021/02/22/HexoConfig/" title="Hexo安装+butterfly主题配置">Hexo安装+butterfly主题配置</a><time datetime="2021-02-22T09:21:55.762Z" title="Created 2021-02-22 17:21:55 17:21:55">2021-02-22 17:21:55</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/nichijou.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By AkaneOvO</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">我自己来缝补我自己</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="Switch Between Traditional Chinese And Simplified Chinese">簡</button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="Scroll To Comments"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">Local search</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'ECU0dej0ngdBJSNWJTR6fb9V-gzGzoHsz',
+      appKey: 'HonaDHpeaCrGIneVqeIFOeR9',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","hOffset":50,"vOffset":50,"width":150,"height":300},"mobile":{"show":true},"log":false});</script></body></html>

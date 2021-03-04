@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>Git内部原理-笔记</title>
+      <link href="2021/03/04/gitInternalPrinciple/"/>
+      <url>2021/03/04/gitInternalPrinciple/</url>
+      
+        <content type="html"><![CDATA[<p>看了之后总觉得之前操作系统实验不是白写的╰(￣ω￣ｏ)</p><p>参考：</p><p><a href="http://www.ruanyifeng.com/blog/2018/10/git-internals.html">阮一峰:Git原理入门</a></p><p><a href="https://segmentfault.com/a/1190000016320008">Git数据存储的原理浅析</a></p><p><a href="https://git-scm.com/book/zh/v2/Git-%E5%86%85%E9%83%A8%E5%8E%9F%E7%90%86-Git-%E5%AF%B9%E8%B1%A1">Git内部原理－Git对象</a></p><p><code>.git</code>目录是维护git信息的目录</p><h2 id="git文件结构"><a href="#git文件结构" class="headerlink" title="git文件结构"></a>git文件结构</h2><p><code>.git</code>文件中的内容</p><p><img src="/img/clip_image002.png" alt="img"></p><ul><li><p>HEAD</p><p>当前提交的指针的位置</p><p><img src="/img/clip_image004.png" alt="img"></p></li><li><p>refs/head</p><p>保存了本地全部分支最后一次提交的id</p><p>由于每一次commit的实际上是commit一个文件，而这个id就是commit文件的hash值，这种方式贯穿了git的全部文件的命名</p><p><img src="/img/clip_image005.png" alt="img"></p></li><li><p>log</p><p>每一次提交的记录</p><p><img src="/img/clip_image007.png" alt="img"></p></li><li><p>objects</p><p>存放git本地仓库对象</p></li></ul><h2 id="Git底层数据对象"><a href="#Git底层数据对象" class="headerlink" title="Git底层数据对象"></a>Git底层数据对象</h2><p><img src="/img/clip_image009.png" alt="img"></p><ul><li><p>tag对象</p></li><li><p>blob对象</p><p>用于存储文件内容（不会保存文件名）</p><p>因为<code>git add .</code>命令实际上执行的是</p><ul><li>保存对象（<code>git hash-object</code>）</li><li>更新暂存区（<code>git update-index</code>，在暂存区记录一个发生变动的文件）</li></ul><p>其中<code>git hash-object</code>做的就是就是把文件的内容压缩为二进制文件，称为一个git对象（文件的话就是blob对象），保存在<code>.git/objects</code>目录中</p><p>使用<code>git hash-obejct</code>命令还会计算当前内容的<code>SHA1</code>哈希值（长度为40的字符串），作为该对象的文件名，其中前两个字母为object文件夹中的文件夹名，后面的字母为该文件夹下的文件名，如果用<code>cat</code>查看的话会发现里面是一些压缩后的二进制内容</p><p><img src="/img/clip_image011.png" alt="img"></p></li><li><p>tree对象</p><p>用于存储当前目录结构，能够保存文件名，将多个文件组织到一起</p><p><code>git write-tree</code>命令能够将当前的目录结构生成一个git对象（tree对象），也保存在<code>.git/object</code>目录中</p></li><li><p>commit对象</p><p><code>commit</code>的时候有提交说明，包括所在的tree，parent（父提交）是谁，作者等信息</p><p><code>git commit-tree</code>命令将元数据（blob）和目录树（tree）一起生成一个git对象（commit对象），也保存在<code>git/object</code>目录中</p><p>这样通过上面那张图，就可以大致看出git本地存储的文件结构了</p></li></ul><p>在每一次提交的时候，objects、logs以及refs文件夹都会发生变化：</p><ul><li>objects文件夹中新增对应的tree、blob以及commit对象（通过SHA-1对内容和头信息生成Hash值）</li><li>logs文件夹中对应分支的文件新增一次提交记录</li><li>更改refs文件夹中对应分支最新一次提交的id（commit对象的值）</li></ul><h2 id="剖析Git对象"><a href="#剖析Git对象" class="headerlink" title="剖析Git对象"></a>剖析Git对象</h2><p>由于<code>.git/objects</code>目录中的文件都是压缩过的，可以使用<code>cat-file</code>命令从git中取回数据（剖析git对象），<code>-p</code>选项可以使该命令自动判断内容的类型，并展示大致内容</p><p>如果删掉了本地的副本，而<code>.git/objects</code>中还保存着压缩后的内容，在知道对应的SHA-1的情况下，可以取回对应的内容</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git cat-file -p 83baae61804e65cc73a7201a7252750c76066a30 &gt; test.txt</span><br></pre></td></tr></table></figure><h2 id="包文件"><a href="#包文件" class="headerlink" title="包文件"></a>包文件</h2><p>由于Git最初向磁盘中存储对象所使用的格式为loose格式，它会时不时将多个这些对象打包成一个packfile的二进制文件，用来节省空间和提升效率（垃圾回收，手动方式：<code>git gc --auto</code>，可以通过<code>gc.auto</code>和<code>gc.autopacklimit</code>来设置超过多少个松散对象和包文件才让git启动一次gc命令）</p><p>可以使用<code>git gc</code>命令对Git对象进行打包；向远程服务器进行推送时，git也会打包</p><p>打包之后，你的<code>objects</code>目录可能变成这个样子：</p><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ find .git/objects -type f</span><br><span class="line">.git/objects/bd/9dbf5aae1a3862dd1526723246b20206e5fc37</span><br><span class="line">.git/objects/d6/70460b4b4aece5915caf5c68d12f560a9fe3e4</span><br><span class="line">.git/objects/info/packs</span><br><span class="line">.git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.idx</span><br><span class="line">.git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.pack</span><br></pre></td></tr></table></figure><p><code>pack</code>是一个包文件，而<code>idx</code>是对应的索引文件</p><p>索引文件中包含了包文件的偏移信息，可以通过索引文件快速定位任意一个指定对象</p><p>git打包对象时，会查找命名及大小相近的文件，且保存不同文件版本之间的差异</p><p>如果执行了<code>git gc</code>命令，该命令还会将<code>refs</code>文件夹中的文件进行打包，将其移动到名为<code>.git/packed-refs</code>的文件中，因此，如果你在<code>refs</code>目录中找不到一个引用，那么它可能在<code>packed-refs</code>文件中 </p><p>那么那么那么，学习了上面的知识，如果不采用传送整个<code>.git</code>文件夹的方式，每次要把本地<code>commit</code>的文件传送到远端，我们需要发送哪些文件嘞(σ｀д′)σ</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Git </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Git </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>明日方舟 鸡翅小羊双人CE-5</title>
       <link href="2021/03/02/aknights_1/"/>
       <url>2021/03/02/aknights_1/</url>
