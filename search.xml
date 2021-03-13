@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>明日方舟 如何抠出小人透明背景GIF</title>
+      <link href="2021/03/13/aknights_gif/"/>
+      <url>2021/03/13/aknights_gif/</url>
+      
+        <content type="html"><![CDATA[<p>事情的起因是看到b站上有人把方舟的小人弄了下来然后放到了桌面当看板娘(:３っ)∋ </p><p>搞了半天不知道怎么就遍历到了把prts上小人的gif弄下来（可能为了以后整活做准备吧）</p><p><a href="https://www.bilibili.com/video/BV137411F76f">参考视频</a></p><p>视频里面是旧版的prts，主要是要f12把整个页面的背景弄成绿色，然后用录屏软件录个屏，然后用ae把背景去掉就好了</p><p>但是新版的prts已经可以直接下载gif了，甚至还可以调小人动画的的背景色还有透明度，现在直接把背景调到透明然后点下载就好了</p><p>但是整活大师瓜某眼瞎，刚开始只看到了调背景颜色没看到透明度，还是经历了一下ae扣背景图+pr导出gif的痛苦流程，但是以后可能会用得着，这里先记着吧</p><p>这里拿我们可爱的温蒂来举栗子</p><h3 id="Step1-下载纯色背景的gif"><a href="#Step1-下载纯色背景的gif" class="headerlink" title="Step1:下载纯色背景的gif"></a>Step1:下载纯色背景的gif</h3><p>最好是绿的绿的绿的，绿幕抠像背景一般都是绿的不然就是蓝的，把rgb调成(0,255,0)就好了</p><p>新版的prts选好gif背景色皮肤模型动画然后点下载</p><img src="/img/image-20210313233158818.png" alt="image-20210313233158818" style="zoom: 67%;" /><p>可能prts上是真的用骨架模型+组件临时生成的，有些皮肤可能会贼慢，需要等一等</p><img src="/img/image-20210313233337652.png" alt="image-20210313233337652" style="zoom: 67%;" /><h3 id="Step2-ae导出透明背景图片序列"><a href="#Step2-ae导出透明背景图片序列" class="headerlink" title="Step2:ae导出透明背景图片序列"></a>Step2:ae导出透明背景图片序列</h3><p>把刚刚下载的gif导入项目，再把它拖到中间“新建合成”的位置</p><p>在右边的“效果和预设”里面搜索<code>keylight</code>，那个<code>Keylight(1,2)</code>就是我们要的东西，把它拖到中间的图像上</p><p><img src="/img/image-20210313233659456.png" alt="image-20210313233659456"></p><p><img src="/img/image-20210313233949174.png" alt="image-20210313233949174"></p><p>这个时候左边会出现控制这个效果的面板，点<code>Screen Colour</code>选项的那个吸管，然后点一下显示图片里面的绿色，<code>Screen Colour</code>就会变成下图这样</p><p><img src="/img/image-20210313234123503.png" alt="image-20210313234123503"></p><p>如果你的图片在吸管吸过之后背景没有变透明，而是变成了全黑（类似下图这样）</p><img src="/img/image-20210313234236424.png" alt="image-20210313234236424" style="zoom:50%;" /><p>不要慌张，只是没有切换透明网格而已，点一下下面<code>切换透明网格</code>的按钮就好了</p><p><img src="/img/image-20210313234354996.png" alt="image-20210313234354996"></p><img src="/img/image-20210313234607169.png" alt="image-20210313234607169" style="zoom:50%;" /><p>于是这个时候，我们得到了一个透明背景的温蒂，但是ae没有办法导出gif，所以要先导成透明背景的png序列，然后到ps里面处理</p><p><code>Ctrl+M</code>把它放到渲染队列里面，点击<code>输出模块</code>里的<code>无损</code></p><p><img src="/img/image-20210313234722919.png" alt="image-20210313234722919"></p><p>把通道选为<code>RGB+Alpha</code>，格式选为<code>png序列</code></p><img src="/img/image-20210313234753896.png" alt="image-20210313234753896" style="zoom:67%;" /><p>填好了输出的路径之后，点渲染就可以了</p><p>渲染完之后，我们获得了一个和这个gif同名的文件夹</p><p><img src="/img/image-20210313235015543.png" alt="image-20210313235015543"></p><p>点开之后里面全是一帧一帧的温蒂</p><img src="/img/image-20210313235052492.png" alt="image-20210313235052492" style="zoom:80%;" /><h3 id="Step3-ps生成透明背景的gif"><a href="#Step3-ps生成透明背景的gif" class="headerlink" title="Step3:ps生成透明背景的gif"></a>Step3:ps生成透明背景的gif</h3><p>打开ps，<code>Ctrl+O</code>打开刚刚生成的图像序列的第一张，选中下面的<code>图像序列</code>选项</p><p><img src="/img/image-20210314002756355.png" alt="image-20210314002756355"></p><p>在跳出来的设置里面选择自己希望的帧速率，点击确定之后可以点下面序列的播放按钮查看效果</p><p>点击<code>文件</code>-&gt;<code>存储为Web所用格式</code></p><p><img src="/img/image-20210314003600098.png" alt="image-20210314003600098"></p><p>确保透明度勾上了，选择的是图案透明度仿色之后，点击存储，就可以康到透明背景的可爱温蒂啦</p><p><img src="/img/image-20210314003821526.png" alt="image-20210314003821526"></p><h3 id="一些问题"><a href="#一些问题" class="headerlink" title="一些问题"></a>一些问题</h3><ul><li>prts上选择透明之后不知道为啥我下载下来的背景图就是全黑的而不是透明的</li><li>某一些动作比较多的动作（比如说上面这个温蒂的基建特效动作）prts上生成这个gif需要等的时间比较长，而且在ae里面打开动作会非常的慢，如果导出的时候不希望有太多张图片的话（上面这个栗子原本没调速度的话有300+图片），可以在导出的设置里面把帧数调低一点（这里压到了100+，ae帧率调成了15），还可以在ps里面调帧速来还原原来的速度（这里ps帧率为30fps）</li></ul><h3 id="闲话"><a href="#闲话" class="headerlink" title="闲话"></a>闲话</h3><p>封面是deco的新歌ヴァンパイア，MV的绘还有歌都太棒太棒啦</p><p><a href="https://www.bilibili.com/video/BV1by4y187EM?from=search&seid=16931544522925978996">私心的B站链接 DECO*27 - ヴァンパイア feat. 初音ミク</a></p><p>最后附上辛苦扣出来的可爱温蒂</p><p><img src="/img/weddy.gif" alt="温蒂"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 摸鱼 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 明日方舟 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>浅析Jupyterhub Authenticator的使用</title>
       <link href="2021/03/07/jupyterhub_2/"/>
       <url>2021/03/07/jupyterhub_2/</url>
