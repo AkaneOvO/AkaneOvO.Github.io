@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>AE插件相关</title>
+      <link href="2021/05/17/aePlugin/"/>
+      <url>2021/05/17/aePlugin/</url>
+      
+        <content type="html"><![CDATA[<h2 id="AE插件安装"><a href="#AE插件安装" class="headerlink" title="AE插件安装"></a>AE插件安装</h2><p>插件压缩包下载下来解压应该是一个<code>aex</code>或者一堆<code>aex</code>文件，打开<code>C:\Program Files\Adobe\Common\Plug-ins\7.0\MediaCore</code>，新建一个文件夹，然后把那一堆<code>aex</code>文件丢进去，重启AE的时候在<code>效果</code>的地方就可以看到新添加的插件了</p><p><img src="/img/aeplugin_exp.png" alt="aeplugin_exp"></p><h2 id="插件及使用"><a href="#插件及使用" class="headerlink" title="插件及使用"></a>插件及使用</h2><blockquote><p>学啥用啥，不定期更新，参数可以多试试，下面写的也不是全部</p></blockquote><h3 id="Particular"><a href="#Particular" class="headerlink" title="Particular"></a>Particular</h3><blockquote><p>很好康的粒子效果，还可以让粒子展示成子图层的样子用来变换粒子的形状</p></blockquote><p>一般要改的参数：</p><ul><li><p>发射器</p><ul><li>发射器类型：点-&gt;方盒</li><li>速度及以下四个选项：全0</li><li>发射大小：自行调整，一般覆盖整个要展示的页面即可</li><li>随机种子：生成随机粒子分布用的</li></ul></li><li><p>粒子</p><ul><li><p>生命：不然移动一下游标就发现粒子全没了，值越大粒子保持时间越久</p></li><li><p>粒子类型</p><ul><li><p>子画面</p><p>可以新建一个合成把多个不同的文字排成序列</p><img src="/img/image-20210517204449937.png" alt="image-20210517204449937"  /><p>然后把这个合成拖到当前正在制作的合成里面，选择了粒子类型为子画面之后，就可以选择纹理为刚刚拖进来的那个合成</p></li><li><p>发光球体</p><p>好康的点点</p></li></ul></li><li><p>大小随机：选择了子画面之后可以改改，可以把每个粒子的大小变一下</p></li><li><p>旋转：让粒子转转，看起来不要那么整齐</p></li></ul></li><li><p>物理学</p><ul><li>重力：粒子轻微上浮，蛮好看的</li></ul></li></ul><h3 id="RealGlow"><a href="#RealGlow" class="headerlink" title="RealGlow"></a>RealGlow</h3><blockquote><p>比AE自带的发光要好看的发光效果</p></blockquote><p>一般要改的参数：</p><ul><li>辉光半径：默认的是100，亮瞎我，自行降低</li><li>辉光强度：同上，默认是1</li><li>不相乘：默认不勾选，建议勾上，不然加了辉光之后其他图层就被遮住了</li></ul><h3 id="音频频谱"><a href="#音频频谱" class="headerlink" title="音频频谱"></a>音频频谱</h3><blockquote><p>AE自带用于生成音频频谱</p></blockquote><p>选择音频层为添加的音乐后，在添加了音频频谱的层上面再加一层蒙版，把路径选成那个蒙版就可以改成自己想要的形状了</p><p>一般要改的参数：</p><ul><li>音频层：这个音频频谱基于哪段音乐</li><li>路径：可以改变频谱形状，基于本合成中的某个蒙版</li><li>起始频率和终止频率：范围调小可以让波形都在一个范围内</li><li>最大高度</li><li>内部颜色和外部颜色</li><li>显示选项<ul><li>数字：类似喷泉</li><li>模拟谱线：心电图</li><li>模拟频点：点</li></ul></li><li>面选项</li></ul><h2 id="一些成果"><a href="#一些成果" class="headerlink" title="一些成果"></a>一些成果</h2><h3 id="3D空间"><a href="#3D空间" class="headerlink" title="3D空间"></a>3D空间</h3><p>Particular+RealGlow and so on</p><p><a href="https://www.bilibili.com/video/BV1bs411q7t9">原教程地址</a>，偷懒阉割了背景和辉光的效果</p><video width="480" height="320" controls><source src="/img/三维.mp4"></video><h3 id="频谱"><a href="#频谱" class="headerlink" title="频谱"></a>频谱</h3><p>音频频谱+生成-&gt;圆形 and so on</p><p><a href="https://www.bilibili.com/video/BV1Cs411R762">原教程地址</a></p><video width="480" height="320" controls><source src="/img/频谱2.mp4"></video>]]></content>
+      
+      
+      <categories>
+          
+          <category> AE </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> AE </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Django学习笔记</title>
       <link href="2021/04/06/django_1/"/>
       <url>2021/04/06/django_1/</url>
@@ -106,11 +131,11 @@
     
     
     <entry>
-      <title>明日方舟 双人CE-5系列</title>
+      <title>摸鱼合集</title>
       <link href="2021/03/02/aknights_1/"/>
       <url>2021/03/02/aknights_1/</url>
       
-        <content type="html"><![CDATA[<p>摸鱼使我快乐.jpg</p><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=204442921&bvid=BV12h411k7N9&cid=305192999&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div><hr><p>好家伙我又摸鱼了</p><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=844544971&bvid=BV1x54y1a7kC&cid=307324801&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div>]]></content>
+        <content type="html"><![CDATA[<p>瓜瓜的不定期摸鱼合集</p><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=845548525&bvid=BV1N54y1L7GQ&cid=337676713&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div><hr><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=333052268&bvid=BV1jA411G7k8&cid=337221707&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div><hr><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=757954664&bvid=BV1J64y127NV&cid=335938705&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div><hr><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=375006348&bvid=BV1YZ4y1c7Uk&cid=324694127&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div><hr><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=844544971&bvid=BV1x54y1a7kC&cid=307324801&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div><hr><div class="bilibili">    <iframe src="//player.bilibili.com/player.html?aid=204442921&bvid=BV12h411k7N9&cid=305192999&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe></div><hr>]]></content>
       
       
       <categories>
@@ -119,12 +144,6 @@
           
       </categories>
       
-      
-        <tags>
-            
-            <tag> 明日方舟 </tag>
-            
-        </tags>
       
     </entry>
     
@@ -173,12 +192,6 @@
         <tags>
             
             <tag> JupyterHub </tag>
-            
-            <tag> tornado </tag>
-            
-            <tag> cookie secret </tag>
-            
-            <tag> ssl </tag>
             
         </tags>
       
