@@ -1,0 +1,377 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JVM architecture | AkaneOvO's Blog</title><meta name="keywords" content="JAVA"><meta name="author" content="AkaneOvO"><meta name="copyright" content="AkaneOvO"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="终于补了之前一直拖着没看的JVM architecture… 参考： The Byte Code Verification Process YouTube: JVM Architecture WIKIPEDIA: Java Classloader WIKIPEDIA: Java Virtual Machine geeksforgeeks: How JVM Works - JVM Architect">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM architecture">
+<meta property="og:url" content="http://example.com/2021/07/03/JVM/index.html">
+<meta property="og:site_name" content="AkaneOvO&#39;s Blog">
+<meta property="og:description" content="终于补了之前一直拖着没看的JVM architecture… 参考： The Byte Code Verification Process YouTube: JVM Architecture WIKIPEDIA: Java Classloader WIKIPEDIA: Java Virtual Machine geeksforgeeks: How JVM Works - JVM Architect">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/img/vinland.png">
+<meta property="article:published_time" content="2021-07-02T16:18:51.537Z">
+<meta property="article:modified_time" content="2021-07-02T16:37:47.103Z">
+<meta property="article:author" content="AkaneOvO">
+<meta property="article:tag" content="JAVA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/vinland.png"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2021/07/03/JVM/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"We didn't find any results for the search: ${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2021-07-03 00:37:47 00:37:47'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><link rel="stylesheet" href="/css/bilibili.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" src="/img/favicon.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">11</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">11</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/vinland.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">AkaneOvO's Blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">JVM architecture</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2021-07-02T16:18:51.537Z" title="Created 2021-07-03 00:18:51 00:18:51">2021-07-03 00:18:51</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2021-07-02T16:37:47.103Z" title="Updated 2021-07-03 00:37:47 00:37:47">2021-07-03 00:37:47</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/JAVA/">JAVA</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">1.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>10min</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post View:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>终于补了之前一直拖着没看的JVM architecture…</p>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/security-in-java.html">The Byte Code Verification Process</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=QHIWkwxs0AI">YouTube: JVM Architecture</a></p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Java_Classloader">WIKIPEDIA: Java Classloader</a></p>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Java_virtual_machine">WIKIPEDIA: Java Virtual Machine</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/jvm-works-jvm-architecture/">geeksforgeeks: How JVM Works - JVM Architecture?</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/security-in-java.html">Oracle: The Java Language Environment</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/java-memory-management/">geeksforgeeks: Java Memory Management</a></p>
+<p><a target="_blank" rel="noopener" href="http://www.herongyang.com/JVM/Stack-Overflow-What-Is-JVM-Stack.html">What is JVM Stack</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.geeksforgeeks.org/java-virtual-machine-jvm-stack-area/">geekforgeeks: JVM Stack Area</a></p>
+<p><a target="_blank" rel="noopener" href="https://codeahoy.com/2017/08/06/basics-of-java-garbage-collection/">basics of java garbage collection</a></p>
+<p>自己画了个图(っ´Ι`)っ<br><img src="/img/JVM.png" alt="JVM"></p>
+<h2 id="Class-Loader"><a href="#Class-Loader" class="headerlink" title="Class Loader"></a>Class Loader</h2><h3 id="Loading"><a href="#Loading" class="headerlink" title="Loading"></a>Loading</h3><blockquote>
+<p>The <strong>Java Class Loader</strong> is a part of the Java Runtime Environment that dynamically loads Java classes into the Java Virtual Machine. Usually classes are only loaded on demand.</p>
+<p>The Class loader reads the “.<em>class”</em> file, generate the corresponding binary data and save it in the method area.</p>
+</blockquote>
+<ul>
+<li><p>bootstrap class loader：loads the core java libraries located in the <code>&lt;JAVA_HOME&gt;/jre/lib</code> directory，例如使用<code>System.out.println(&quot;hello&quot;)</code>时需要导入<code>java.lang</code>，就是由<code>bootstrap loader</code>通过导入<code>rt.jar</code>包实现的</p>
+</li>
+<li><p>extension class loader：loads the code in the extensions directories (<code>&lt;JAVA_HOME&gt;/jre/lib/ext</code>,[<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Java_Classloader#cite_note-TJT:UECL-3">3]</a> or any other directory specified by the <code>java.ext.dirs</code> system property). 例如使用了<code>jdbc</code>和数据库进行连接，就需要使用到<code>extension class loader</code></p>
+</li>
+<li><p>system/application class loader：用来导入自己写的<code>.java</code>转成的<code>.class</code>文件</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>Note:</strong> JVM follows the Delegation-Hierarchy principle to load classes. System class loader delegate load request to extension class loader and extension class loader delegate request to the bootstrap class loader. If a class found in the boot-strap path, the class is loaded otherwise request again transfers to the extension class loader and then to the system class loader. At last, if the system class loader fails to load class, then we get run-time exception <em>java.lang.ClassNotFoundException</em>. </p>
+</blockquote>
+<p>大概是说，load class的时候是从bootstrap classloader开始一层层向下进行委托，即，bootstrap loader先拜托extension classloader，extension loader再拜托application classloader在自己的路径下查找，如果没有在自己的路径下找到对应的class，再由它的上一级在自己对应的目录下查找，如果找了一圈都没有找到，我们就会得到<code>java.lang.ClassNotFoundException</code></p>
+<h3 id="Linking"><a href="#Linking" class="headerlink" title="Linking"></a>Linking</h3><ul>
+<li><p>verification</p>
+<p>用于确保字节码文件符合标准，如果在verification的时候fail了，就会得到<code>runtime exception java.lang.VerifyError</code></p>
+<p>这个过程由<code>ByteCodeVerifier</code>完成</p>
+<blockquote>
+<p>The bytecode verifier acts as a sort of gatekeeper: it ensures that code passed to the Java interpreter is in a fit state to be executed and can run without fear of breaking the Java interpreter. Imported code is not allowed to execute by any means until after it has passed the verifier’s tests.</p>
+<p>Once the verifier is done, a number of important properties are known:</p>
+<ul>
+<li>There are no operand stack overflows or underflows</li>
+<li>The types of the parameters of all bytecode instructions are known to always be correct</li>
+<li>Object field accesses are known to be legal–private, public, or protected</li>
+</ul>
+</blockquote>
+</li>
+<li><p>preparation</p>
+<p>为变量预先分配内存空间</p>
+<blockquote>
+<p>allocates memory for class variables and initializing the memory to default values</p>
+</blockquote>
+</li>
+<li><p>resolution</p>
+<p>没太懂，好像是说把符号引用变成直接引用（但是符号引用是个啥不知道</p>
+<blockquote>
+<p>transforms symbolic references from the type into direct references.</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="Initialization"><a href="#Initialization" class="headerlink" title="Initialization"></a>Initialization</h3><p>自上而下，自父类到子类为静态变量赋值</p>
+<blockquote>
+<p>In this phase, all static variables are assigned with their values defined in the code and static block(if any). This is executed from top to bottom in a class and from parent to child in the class hierarchy.</p>
+</blockquote>
+<h2 id="Runtime-Memory-Data"><a href="#Runtime-Memory-Data" class="headerlink" title="Runtime Memory Data"></a>Runtime Memory Data</h2><h3 id="Heap-Area"><a href="#Heap-Area" class="headerlink" title="Heap Area"></a>Heap Area</h3><ul>
+<li><p><strong>a shared runtime area</strong> and stored the actual object in memory</p>
+<p>it’s instantiated during the virtual machine startup, <strong>the memory is allocated for all class instances and array</strong></p>
+</li>
+<li><p>can be of <strong>fixed or dynamic size</strong> depending upon the system’s configuration</p>
+</li>
+<li><p>provides the user control to initialize or vary the size of heap as per requirement</p>
+</li>
+<li><p><strong>when a new keyword is used, objects is assigned a space in heap, but the reference of the same exists onto the stack</strong></p>
+</li>
+<li><p>there exists one and only one heap for a running JVM process</p>
+</li>
+<li><p><strong>garbage collection</strong> in heap area is <strong>mandatory</strong></p>
+</li>
+</ul>
+<h4 id="eden-space"><a href="#eden-space" class="headerlink" title="eden space"></a>eden space</h4><ul>
+<li>bigger than two survivor spaces combined</li>
+<li>all objects are first created here</li>
+<li>when eden space is full, a minor garbage collection is triggered, all new objects are quickly inspected to check their eligibility for garbage collection. The ones are not referenced from other objects are marked as dead and garbage collected, the survivor objects are moved to one of the empty survivor spaces</li>
+</ul>
+<h4 id="survivor-space"><a href="#survivor-space" class="headerlink" title="survivor space"></a>survivor space</h4><p>why have two survivor space?</p>
+<ul>
+<li>to avoid memory fragment</li>
+<li>after garbage collection, this will leave holes in memory where the dead objects previously lived and compaction will be needed</li>
+<li>to avoid compaction, JVM just copied surviving objects from the survivor space to the other survivor space so there is no holes or empty spaces</li>
+</ul>
+<h4 id="tenured-space"><a href="#tenured-space" class="headerlink" title="tenured space"></a>tenured space</h4><p>minor garbage collections ping-ping live objects from eden and one of the survivor space to the other, objects moved to the old generation until one of the following happens:</p>
+<ul>
+<li>Objects reach <em>maximum tenuring threshold</em>, in other words, have ping-pong’ed enough times that they aren’t young anymore</li>
+<li>There is no room in survivor space to receive newly birthed objects</li>
+</ul>
+<blockquote>
+<p>the old generation is used to store long-lived objects, eventually, the old generation also needs to be garbage collected and this is called <strong>major garbage collection</strong></p>
+</blockquote>
+<p><strong>总结</strong>：对于<code>eden space</code>每次满的时候都会做一次<code>minor garbage collection</code>，从这次垃圾回收中存活下来的object会被放到<code>survivor space</code>里去，当<code>survivor space</code>被放满的时候，也会有一次<code>minor garbage collection</code>，将它里面的object进行整理，放到另一个空的<code>survivor space</code>里。一个object每活过一次<code>minor garbage collection</code>就会变老，它变老会有个上限<code>threshold</code>，当达到这个值时就会被放到<code>tenured space</code>里；或者当<code>survivor space</code>里面已经没有空间来放入新生的objects的时候，也会将一些object放到<code>tenured space</code>里面。</p>
+<h4 id="permanent-space"><a href="#permanent-space" class="headerlink" title="permanent space"></a>permanent space</h4><blockquote>
+<p>The pool containing all the reflective data of the virtual machine itself, such as class and method objects</p>
+</blockquote>
+<h3 id="Method-Area"><a href="#Method-Area" class="headerlink" title="Method Area"></a>Method Area</h3><ul>
+<li>a logical part of the heap</li>
+<li>This memory is <strong>allocated for class structures, method data and constructor filed data, and also for interfaces or special method used in class</strong></li>
+<li>can be of a fixed size or expanded as required by the computation, needs not to be continuous</li>
+<li>Though method area is logically a part of heap, <strong>it may or may not be garbage collected even if garbage collection is compulsory in heap area.</strong></li>
+</ul>
+<h3 id="JVM-Stack"><a href="#JVM-Stack" class="headerlink" title="JVM Stack"></a>JVM Stack</h3><ul>
+<li>a stack <strong>is created at the same time when a thread is created</strong> and is used to store data and partial results</li>
+<li>can either be of fixed or dynamic size, need not to be continuous</li>
+</ul>
+<h4 id="stack-frames"><a href="#stack-frames" class="headerlink" title="stack frames"></a>stack frames</h4><blockquote>
+<p>A JVM stack data area is actually organized as a stack of frames</p>
+</blockquote>
+<p>a life cycle of a frame</p>
+<ul>
+<li>a new frame is created when a new method is invoked</li>
+<li>the new frame is added to the top of the stack with the execution control is transferred to the new method</li>
+<li>the new frame is used during the execution of the new method to store local variables, partial results, and data for subsequent method invocations and returns</li>
+<li>the new frame is removed from the top of the stack when the execution control is returned from the new method</li>
+</ul>
+<p>stack frame structure</p>
+<ul>
+<li>Local Variable Array（LVA）<ul>
+<li>contains all parameters and local variables of the method</li>
+<li>each slot in the array is 4 Bytes</li>
+<li>int、float and reference occupy 1 slot</li>
+<li>float、double and long occupy 2 slot</li>
+<li>byte、short and char values will be converted to int type before storing</li>
+<li>the way of storing boolean values is varied from JVM to JVM, usually 1 slot</li>
+<li>the parameters are placed into the local variable array according to the order they are declared</li>
+</ul>
+</li>
+<li>Operand Stack（OS）<ul>
+<li>the operand stack is organized as an array of words like LVA, but this is not accessed by using an index, it’s accessed by some instructions that can push or pop values from the operand stack</li>
+</ul>
+</li>
+<li>Frame Data（FD）<ul>
+<li>contains all symbolic references (constant pool resolution) and normal method returns related to that particular method</li>
+<li>contains a reference to the Exception table which provides the corresponding catch block information in the case of exceptions</li>
+</ul>
+</li>
+</ul>
+<h4 id="StackOverFlowError"><a href="#StackOverFlowError" class="headerlink" title="StackOverFlowError"></a>StackOverFlowError</h4><blockquote>
+<p>A StackOverflowError is an exception thrown by a thread, when it’s stack has no more room to add a new frame to make the next method call.</p>
+</blockquote>
+<h3 id="Native-Method-Stack"><a href="#Native-Method-Stack" class="headerlink" title="Native Method Stack"></a>Native Method Stack</h3><ul>
+<li>not written in java language</li>
+<li>this memory is allocated for each thread when its created</li>
+</ul>
+<h3 id="PC-Registers"><a href="#PC-Registers" class="headerlink" title="PC Registers"></a>PC Registers</h3><ul>
+<li>each JVM thread which carries out the task of a specific method has a program counter register associated with it</li>
+<li>PC register is capable of storing the return address or a native pointer on some specific platform</li>
+</ul>
+<h2 id="Execution-Engine"><a href="#Execution-Engine" class="headerlink" title="Execution Engine"></a>Execution Engine</h2><blockquote>
+<p>Each thread of a running application is a distinct instance of the virtual machine’s execution engine. Execution engine executes the byte code which is assigned to the run time data areas in JVM via class loader. Java Class files are executed by the execution engine.</p>
+</blockquote>
+<h3 id="Interpreter"><a href="#Interpreter" class="headerlink" title="Interpreter"></a>Interpreter</h3><blockquote>
+<p>It reads the byte code and interprets into the machine code(native code) and executes them in a sequential manner.</p>
+<p>The problem with the interpreter is that it interprets every time, even the same method multiple times, which reduces the performance of the system</p>
+</blockquote>
+<h3 id="Just-In-Time-Compiler-JIT"><a href="#Just-In-Time-Compiler-JIT" class="headerlink" title="Just-In-Time Compiler(JIT)"></a>Just-In-Time Compiler(JIT)</h3><blockquote>
+<p>balances the interpreter’s disadvantage of slow execution and improves the performance</p>
+</blockquote>
+<h3 id="Garbage-Collector"><a href="#Garbage-Collector" class="headerlink" title="Garbage Collector"></a>Garbage Collector</h3><h4 id="Garbage-Collection-Algorithms"><a href="#Garbage-Collection-Algorithms" class="headerlink" title="Garbage Collection Algorithms"></a>Garbage Collection Algorithms</h4><ul>
+<li>serial collector<ul>
+<li>uses a single thread to perform all garbage work</li>
+<li>relatively efficient, because there is no communication overhead between threads</li>
+<li>best-suited to single processor machines</li>
+</ul>
+</li>
+<li>parallel collector<ul>
+<li>known as the throughput collector</li>
+<li>can significantly reduce garbage collection overhead</li>
+<li>intended for applications with medium-sized to large-sized data sets that are run on multiprocessor or multithread hardware</li>
+</ul>
+</li>
+<li>concurrent collector<ul>
+<li>keep garbage collection pause short</li>
+<li>It is designed for applications with medium-sized to large-sized data sets in which response time is more important than overall throughput because the techniques used to minimize pauses can reduce application performance</li>
+</ul>
+</li>
+</ul>
+<p>HotSpot JVM allows you to configure separate GC algorithms for young and old generations. But you can only <strong>pair up compatible</strong> algorithms. </p>
+<h4 id="Mark-and-Sweep-Algorithm"><a href="#Mark-and-Sweep-Algorithm" class="headerlink" title="Mark and Sweep Algorithm"></a>Mark and Sweep Algorithm</h4><p>it contains two phases</p>
+<ul>
+<li><p>mark phase</p>
+<p>It identifies and marks all objects that are in use, and the remaining can be considered garbage.</p>
+</li>
+<li><p>sweep phase</p>
+<p>In this phase, the heap is traversed to find the gap between the live objects. These gaps are recorded in the free list and are available for new object allocation.</p>
+</li>
+</ul>
+<h3 id="Java-Native-Interface-JNI"><a href="#Java-Native-Interface-JNI" class="headerlink" title="Java Native Interface(JNI)"></a>Java Native Interface(JNI)</h3><blockquote>
+<p>JNI acts as a bridge between java method calls and corresponding native libraries</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">AkaneOvO</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="http://example.com/2021/07/03/JVM/">http://example.com/2021/07/03/JVM/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/JAVA/">JAVA</a></div><div class="post_share"><div class="social-share" data-image="/img/vinland.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button button--animated"><i class="fas fa-qrcode"></i> Donate</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="/img/wechat.png" target="_blank"><img class="post-qr-code-img" src="/img/wechat.png" alt="wechat"/></a><div class="post-qr-code-desc">wechat</div></li><li class="reward-item"><a href="/img/alipay.jpg" target="_blank"><img class="post-qr-code-img" src="/img/alipay.jpg" alt="alipay"/></a><div class="post-qr-code-desc">alipay</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2021/05/17/aePlugin/"><img class="next-cover" src="/img/noragami.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">AE插件相关</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> Comment</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/favicon.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">AkaneOvO</div><div class="author-info__description">借我温软的鲁莽和玩笑的庄严</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">11</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">Tags</div><div class="length-num">11</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">Categories</div><div class="length-num">8</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/AkaneOvO"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/AkaneOvO" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:akaneovo0517@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Class-Loader"><span class="toc-number">1.</span> <span class="toc-text">Class Loader</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Loading"><span class="toc-number">1.1.</span> <span class="toc-text">Loading</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Linking"><span class="toc-number">1.2.</span> <span class="toc-text">Linking</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Initialization"><span class="toc-number">1.3.</span> <span class="toc-text">Initialization</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Runtime-Memory-Data"><span class="toc-number">2.</span> <span class="toc-text">Runtime Memory Data</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Heap-Area"><span class="toc-number">2.1.</span> <span class="toc-text">Heap Area</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#eden-space"><span class="toc-number">2.1.1.</span> <span class="toc-text">eden space</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#survivor-space"><span class="toc-number">2.1.2.</span> <span class="toc-text">survivor space</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#tenured-space"><span class="toc-number">2.1.3.</span> <span class="toc-text">tenured space</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#permanent-space"><span class="toc-number">2.1.4.</span> <span class="toc-text">permanent space</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Method-Area"><span class="toc-number">2.2.</span> <span class="toc-text">Method Area</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JVM-Stack"><span class="toc-number">2.3.</span> <span class="toc-text">JVM Stack</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#stack-frames"><span class="toc-number">2.3.1.</span> <span class="toc-text">stack frames</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#StackOverFlowError"><span class="toc-number">2.3.2.</span> <span class="toc-text">StackOverFlowError</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Native-Method-Stack"><span class="toc-number">2.4.</span> <span class="toc-text">Native Method Stack</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PC-Registers"><span class="toc-number">2.5.</span> <span class="toc-text">PC Registers</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Execution-Engine"><span class="toc-number">3.</span> <span class="toc-text">Execution Engine</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Interpreter"><span class="toc-number">3.1.</span> <span class="toc-text">Interpreter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Just-In-Time-Compiler-JIT"><span class="toc-number">3.2.</span> <span class="toc-text">Just-In-Time Compiler(JIT)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Garbage-Collector"><span class="toc-number">3.3.</span> <span class="toc-text">Garbage Collector</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Garbage-Collection-Algorithms"><span class="toc-number">3.3.1.</span> <span class="toc-text">Garbage Collection Algorithms</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Mark-and-Sweep-Algorithm"><span class="toc-number">3.3.2.</span> <span class="toc-text">Mark and Sweep Algorithm</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Java-Native-Interface-JNI"><span class="toc-number">3.4.</span> <span class="toc-text">Java Native Interface(JNI)</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2021/07/03/JVM/" title="JVM architecture"><img src="/img/vinland.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="JVM architecture"/></a><div class="content"><a class="title" href="/2021/07/03/JVM/" title="JVM architecture">JVM architecture</a><time datetime="2021-07-02T16:18:51.537Z" title="Created 2021-07-03 00:18:51 00:18:51">2021-07-03 00:18:51</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/05/17/aePlugin/" title="AE插件相关"><img src="/img/noragami.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AE插件相关"/></a><div class="content"><a class="title" href="/2021/05/17/aePlugin/" title="AE插件相关">AE插件相关</a><time datetime="2021-05-17T12:31:02.872Z" title="Created 2021-05-17 20:31:02 20:31:02">2021-05-17 20:31:02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/04/06/django_1/" title="Django学习笔记"><img src="/img/horizon.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Django学习笔记"/></a><div class="content"><a class="title" href="/2021/04/06/django_1/" title="Django学习笔记">Django学习笔记</a><time datetime="2021-04-06T11:07:05.624Z" title="Created 2021-04-06 19:07:05 19:07:05">2021-04-06 19:07:05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/13/aknights_gif/" title="明日方舟 如何抠出小人透明背景GIF"><img src="/img/deco27.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="明日方舟 如何抠出小人透明背景GIF"/></a><div class="content"><a class="title" href="/2021/03/13/aknights_gif/" title="明日方舟 如何抠出小人透明背景GIF">明日方舟 如何抠出小人透明背景GIF</a><time datetime="2021-03-13T15:11:50.463Z" title="Created 2021-03-13 23:11:50 23:11:50">2021-03-13 23:11:50</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2021/03/07/jupyterhub_2/" title="浅析Jupyterhub Authenticator的使用"><img src="/img/bingguo.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="浅析Jupyterhub Authenticator的使用"/></a><div class="content"><a class="title" href="/2021/03/07/jupyterhub_2/" title="浅析Jupyterhub Authenticator的使用">浅析Jupyterhub Authenticator的使用</a><time datetime="2021-03-07T08:47:41.385Z" title="Created 2021-03-07 16:47:41 16:47:41">2021-03-07 16:47:41</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('/img/vinland.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By AkaneOvO</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">我自己来缝补我自己</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="Switch Between Traditional Chinese And Simplified Chinese">簡</button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="Scroll To Comments"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><div class="search-dialog__title" id="local-search-title">Local search</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts" type="text"/></div></div></div><hr/><div id="local-search-results"></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'ECU0dej0ngdBJSNWJTR6fb9V-gzGzoHsz',
+      appKey: 'HonaDHpeaCrGIneVqeIFOeR9',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'en',
+      recordIP: false,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !false) {
+  if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><canvas class="fireworks" mobile="false"></canvas><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/fireworks.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","hOffset":50,"vOffset":50,"width":150,"height":300},"mobile":{"show":true},"log":false});</script></body></html>
